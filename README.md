@@ -1,80 +1,172 @@
-# 🤖 AutoPLC AI Agent for Siemens TIA Portal
+# 🤖 AutoPLC — AI Code Generator for Siemens TIA Portal
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![TIA Portal](https://img.shields.io/badge/TIA%20Portal-V17%2B-orange.svg)
-![Local AI](https://img.shields.io/badge/Inference-Qwen3--Coder--Next-purple)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/TIA%20Portal-V17%2B-orange.svg" alt="TIA Portal">
+  <img src="https://img.shields.io/badge/Inference-Qwen3--Coder--Next-purple.svg" alt="Local AI">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+</p>
 
-AutoPLC generates Siemens STL/SCL code from prompts or docs using a locally quantized Qwen3 AI model. It creates TIA Openness-compliant XML and directly imports it into your `.apXX` project. Fully offline, zero API costs, complete privacy.
+AutoPLC generates Siemens **STL / SCL** code from natural-language prompts or control narrative documents using a locally quantized Qwen3 AI model. It produces TIA Openness-compliant XML and imports it directly into your `.apXX` project — fully offline, zero API costs, complete privacy.
 
-## 🌟 Features
-- 🧠 **Local AI Inference**: Runs `Qwen/Qwen3-Coder-Next` with 4-bit NF4 quantization (~2.5 GB VRAM)
-- 📝 **Dual Input**: Text prompts or uploaded `.txt`/`.docx`/`.pdf` control narratives
-- 🔀 **Auto Routing**: Dynamically switches between STL & SCL generation pipelines
-- 📦 **Direct TIA Import**: Injects generated Openness XML straight into your `.apXX` project
-- 🖥️ **Modern GUI**: Clean, responsive `customtkinter` desktop interface
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Workflow](#-workflow)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Project Structure](#-project-structure)
+- [Advanced Tips](#-advanced-tips)
+- [Disclaimer](#-disclaimer)
+- [Contributing](#-contributing)
+- [Acknowledgments](#-acknowledgments)
+
+---
+
+## ✨ Features
+
+| Feature | Details |
+|---|---|
+| 🧠 **Local AI Inference** | Runs `Qwen/Qwen3-Coder-Next` with 4-bit NF4 quantization (~2.5 GB VRAM) |
+| 📝 **Dual Input Modes** | Text prompts or uploaded `.txt` / `.docx` / `.pdf` control narratives |
+| 🔀 **Auto Language Routing** | Dynamically switches between STL and SCL generation pipelines |
+| 📦 **Direct TIA Import** | Injects generated Openness XML straight into your `.apXX` project |
+| 🖥️ **Modern GUI** | Clean, responsive `customtkinter` desktop interface |
+| 🔒 **Fully Offline** | No API keys, no cloud calls, no data leaves your machine |
+
+---
 
 ## 🔄 Workflow
-User Input → Parser Layer → Language Router → Local AI Gen → XML Injection → TIA Openness Import
+
+```
+User Input  ──►  Parser Layer  ──►  Language Router  ──►  Local AI Gen
+                                                               │
+TIA Openness Import  ◄──  XML Injection  ◄──────────────────────
+```
+
+---
 
 ## 📦 Installation
 
-### 1. Prerequisites
-- **Windows 10/11** (TIA Portal & Openness API are Windows-only)
-- Python 3.10+
-- NVIDIA GPU with CUDA support (≥4 GB VRAM recommended for 4-bit inference)
-- Siemens TIA Portal V17+ with **Openness API** enabled
+### Prerequisites
 
-### 2. Install Dependencies
+- **OS:** Windows 10 / 11 (TIA Portal Openness API is Windows-only)
+- **Python:** 3.10+
+- **GPU:** NVIDIA with CUDA support — ≥ 4 GB VRAM recommended for 4-bit inference
+- **TIA Portal:** V17+ with the **Openness API** feature enabled during installation
+
+### 1 — Clone the repository
+
+```bash
+git clone https://github.com/your-username/AutoPLC.git
+cd AutoPLC
+```
+
+### 2 — Install Python dependencies
+
 ```bash
 pip install -r requirements.txt
+```
 
-### 3. Configure Openness DLL
-Open TIA_Handler.py and update the DLL path to match your installed TIA version:
+> **Windows note — bitsandbytes:** The standard `bitsandbytes` package does not ship CUDA binaries for Windows. Install the pre-compiled wheel instead:
+> ```bash
+> pip install bitsandbytes-windows
+> ```
+
+### 3 — Configure the TIA Openness DLL path
+
+Open `TIA_Handler.py` and update the reference to match your installed TIA Portal version:
+
 ```python
-clr.AddReference(r"C:\Program Files\Siemens\Automation\Portal V17\PublicAPI\V17\Siemens.Engineering.dll")
+# TIA_Handler.py
+clr.AddReference(
+    r"C:\Program Files\Siemens\Automation\Portal V17\PublicAPI\V17\Siemens.Engineering.dll"
+)
+```
 
-### Usage
-1- Launch the GUI
+---
+
+## 🚀 Usage
+
+### GUI (recommended)
+
 ```bash
 python GUI.py
+```
 
-2- Configure Settings
-    *Choose input mode (text or document upload)
-    *Select TIA version, PLC type, and language (STL/SCL)
-    *Browse to your .apXX TIA project file
+1. **Input mode** — choose between a free-text prompt or a document upload (`.txt`, `.docx`, `.pdf`)
+2. **Settings** — select TIA version, target PLC type, and output language (STL / SCL)
+3. **Project file** — browse to your `.apXX` TIA Portal project
+4. Click **Generate Code** — the AI runs locally, generates the XML, and imports it into your project automatically
 
-3- Generate & Import
-Click Generate Code → AI runs locally → XML is automatically injected into your project
+### Programmatic / batch use
 
-### Project Structure
-AutomaticPLCCodeGenerator/
-├── GUI.py                  # Main desktop interface & workflow orchestrator
-├── TIA_Handler.py          # TIA Portal Openness API wrapper (Python.NET)
-├── generate_stl.py         # STL code generator (local AI + template injection)
-├── generate_scl.py         # SCL code generator (local AI + template injection)
-├── OB1_template.xml        # TIA Openness XML template for STL
-├── OB1_SCL_template.xml    # TIA Openness XML template for SCL
-└── requirements.txt        # Python dependencies
-
-### Advanced Tips
--VRAM Optimization: 4-bit quantization requires bitsandbytes. On Windows, use precompiled wheels: (pip install bitsandbytes-windows)
-
--Batch/Programmatic Use: Call generators directly in your scripts:
 ```python
 from generate_stl import generate_ob1
-xml_path = generate_ob1("Latch motor on start, unlatch on stop.")
+from generate_scl import generate_ob1_scl
 
--Custom Prompts: Edit SYSTEM_PROMPT in generate_*.py to enforce stricter XML rules or add company-specific coding standards.
+# STL
+stl_path = generate_ob1("Latch motor on Start, unlatch on Stop.")
 
-### Important Disclaimer
-AI-generated PLC code must be reviewed, simulated, and tested by a qualified automation engineer before deployment to physical hardware. This tool is an assistant, not a certified safety system. The authors assume no liability for equipment damage, production loss, or safety incidents.
+# SCL
+scl_path = generate_ob1_scl("Conveyor belt with speed ramp-up over 5 seconds and emergency stop.")
+```
 
-### Contributing
-Contributions are welcome! Please fork the repo, create a feature branch, and open a Pull Request with clear descriptions of your changes.
+---
 
-### Acknowledgments
--Qwen Team for the open-weight Qwen3-Coder-Next model
--Siemens AG for the TIA Portal Openness API
--Hugging Face & BitsAndBytes for quantization & inference tooling
--The industrial automation community for open knowledge sharing
+## 🗂️ Project Structure
+
+```
+AutoPLC/
+├── GUI.py                  # Desktop interface & workflow orchestrator
+├── TIA_Handler.py          # TIA Portal Openness API wrapper (Python.NET)
+├── generate_stl.py         # STL pipeline — local AI + template injection
+├── generate_scl.py         # SCL pipeline — local AI + template injection
+├── OB1_template.xml        # TIA Openness XML template (STL)
+├── OB1_SCL_template.xml    # TIA Openness XML template (SCL)
+└── requirements.txt        # Python dependencies
+```
+
+---
+
+## ⚙️ Advanced Tips
+
+**Custom coding standards** — Edit `SYSTEM_PROMPT` in `generate_stl.py` or `generate_scl.py` to enforce stricter XML rules or add company-specific naming conventions and comment styles.
+
+**VRAM-constrained machines** — The 4-bit NF4 quantization already targets ~2.5 GB VRAM. If you hit OOM errors, reduce `max_new_tokens` in the inference call or try an 8-bit quantization configuration.
+
+**Multiple OBs** — The template system is not limited to OB1. Duplicate either template, adjust the `<Name>`, `<Number>`, and `<SecondaryType>` fields, then pass the new template path to `generate_ob1()` / `generate_ob1_scl()` via their `template_path` argument.
+
+---
+
+## ⚠️ Disclaimer
+
+> AI-generated PLC code **must be reviewed, simulated, and validated by a qualified automation engineer** before deployment to any physical hardware or safety-critical system. AutoPLC is a productivity assistant — it is not a certified safety tool and provides no safety guarantees. The authors and contributors accept no liability for equipment damage, production loss, personal injury, or any other incident arising from the use of this software.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! To get started:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes with clear messages
+4. Open a Pull Request describing what you changed and why
+
+Please ensure any new generation logic is tested against at least one TIA Portal import cycle before submitting.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Qwen Team](https://github.com/QwenLM/Qwen) — for the open-weight `Qwen3-Coder-Next` model
+- [Siemens AG](https://www.siemens.com) — for the TIA Portal Openness API
+- [Hugging Face](https://huggingface.co) & [bitsandbytes](https://github.com/TimDettmers/bitsandbytes) — for quantization and inference tooling
+- The industrial automation community — for open knowledge sharing and feedback
+
+---
+
+<p align="center">Made with ☕ and ladder logic</p>
