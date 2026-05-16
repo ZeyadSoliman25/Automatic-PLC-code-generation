@@ -119,7 +119,7 @@ scl_path = generate_ob1_scl("Conveyor belt with speed ramp-up over 5 seconds and
 ## 🗂️ Project Structure
 
 ```
-AutoPLC/
+AutomaticPLCCodeGenerator/
 ├── GUI.py                  # Desktop interface & workflow orchestrator
 ├── TIA_Handler.py          # TIA Portal Openness API wrapper (Python.NET)
 ├── generate_stl.py         # STL pipeline — local AI + template injection
